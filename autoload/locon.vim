@@ -1,9 +1,13 @@
 "
-" [{
-"   'key': k,
-"   'default': v or [v],
-"   'current': v or [v]
-" }]
+" [
+"   'config-key': {
+"     'generator': { default -> ... },
+"     'generator_version': ,
+"     'generated': 'the value',
+"     'generated_version': ,
+"     'default': 'default value',
+"   }
+" ]
 "
 let s:config = {}
 
@@ -22,7 +26,12 @@ endfunction
 "
 function! locon#get(key)
   if has_key(s:config, a:key)
-    return get(s:config[a:key], 'current', s:config[a:key]['default'])
+    let s:c = s:config[a:key]
+    if !has_key(s:c, 'generated') || s:c['generator_version'] != s:c['generated_version']
+      let s:c['generated'] = s:c['generator'](s:c['default'])
+      let s:c['generated_version'] = s:c['generator_version']
+    endif
+    return s:c['generated']
   endif
   throw 'locon: key is not defined.'
 endfunction
@@ -30,10 +39,9 @@ endfunction
 "
 " set specific value.
 "
-function! locon#set(key, fn)
-  if has_key(s:config, a:key)
-    let s:config[a:key]['current'] = a:fn(deepcopy(s:config[a:key]['default']))
-    return
-  endif
+function! locon#set(key, generator)
+  let s:c = s:config[a:key]
+  let s:c['generator'] = a:generator
+  let s:c['generator_version'] = get(s:c, 'generator_version', 0) + 1
 endfunction
 
