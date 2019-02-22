@@ -9,7 +9,7 @@ local config in your vimrc.
 
 call locon#def('ignore_globs', ['.*/', '.git/', '.svn/', 'node_modules/'])
 
-if filereadable(expand('$HOME/.vimrc.local'))
+if filereadable(expand('$HOME/.localconfig.vim'))
   execute printf('source %s', expand('$HOME/.localconfig.vim'))
 endif
 ```
