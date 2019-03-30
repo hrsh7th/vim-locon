@@ -27,6 +27,11 @@ endfunction
 function! locon#get(key)
   if has_key(s:config, a:key)
     let s:c = s:config[a:key]
+
+    if !has_key(s:c, 'generator')
+      return s:c['default']
+    endif
+
     if !has_key(s:c, 'generated') || s:c['generator_version'] != s:c['generated_version']
       if has_key(s:c, 'generator')
         let s:c['generated'] = s:c['generator'](s:c['default'])
@@ -38,15 +43,19 @@ function! locon#get(key)
     endif
     return s:c['generated']
   endif
-  throw 'locon: key is not defined.'
+  echomsg printf('locon: `%s` is not defined.', a:key)
 endfunction
 
 "
 " set specific value.
 "
 function! locon#set(key, generator)
-  let s:c = s:config[a:key]
-  let s:c['generator'] = a:generator
-  let s:c['generator_version'] = get(s:c, 'generator_version', 0) + 1
+  if has_key(s:config, a:key)
+    let s:c = s:config[a:key]
+    let s:c['generator'] = a:generator
+    let s:c['generator_version'] = get(s:c, 'generator_version', 0) + 1
+    return
+  endif
+  echomsg printf('locon: `%s` is not defined.', a:key)
 endfunction
 
